@@ -1,0 +1,49 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: fluentd
+  namespace: openshift-logging
+data:
+  fluent.conf: |2
+
+    @include configs.d/openshift/system.conf
+
+
+    @include configs.d/openshift/input-pre-*.conf
+    @include configs.d/dynamic/input-docker-*.conf
+    @include configs.d/dynamic/input-syslog-*.conf
+    @include configs.d/openshift/input-post-*.conf
+
+    <label @INGRESS>
+      @include configs.d/openshift/filter-pre-*.conf
+      @include configs.d/openshift/filter-retag-journal.conf
+      @include configs.d/openshift/filter-k8s-meta.conf
+      @include configs.d/openshift/filter-kibana-transform.conf
+      @include configs.d/openshift/filter-k8s-flatten-hash.conf
+      @include configs.d/openshift/filter-k8s-record-transform.conf
+      @include configs.d/openshift/filter-syslog-record-transform.conf
+      @include configs.d/openshift/filter-viaq-data-model.conf
+      @include configs.d/openshift/filter-post-*.conf
+    </label>
+
+    <label @OUTPUT>
+      @include configs.d/user/secure-forward.conf
+    </label>
+  secure-forward.conf: |
+    <match **>
+    @type vmware_loginsight
+    scheme https
+    ssl_verify true
+    host loginsight.example.com
+    port 443
+    path api/v1/events/ingest
+    agent_id XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX
+    http_method post
+    serializer json
+    rate_limit_msec 0
+    raise_on_error false
+    log_text_keys ["log","msg","message"]
+    include_tag_key true
+    tag_key tag
+    </match>
+  throttle-config.yaml: ""
