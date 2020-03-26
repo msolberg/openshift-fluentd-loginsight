@@ -13,7 +13,7 @@ https://access.redhat.com/documentation/en-us/openshift_container_platform/4.2/h
 $ oc edit ClusterLogging/instance
 ```
 
-3) Create the fluent-plugin configmap from the directory in this git repository:
+3) Create the fluent-plugin configmap from the example directory [here](openshift/configmaps/fluent-plugin):
 
 ```
 $ oc create configmap fluent-plugin --from-file=openshift/configmaps/fluent-plugin
@@ -89,6 +89,7 @@ data:
     </label>
 
     <label @OUTPUT>
+      # REMOVED ALL ELASTIC OUTPUT CONFIGURATION
       @include configs.d/user/secure-forward.conf
     </label>
   secure-forward.conf: |
