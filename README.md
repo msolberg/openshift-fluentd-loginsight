@@ -19,7 +19,9 @@ $ oc edit ClusterLogging/instance
 $ oc create configmap fluent-plugin --from-file=openshift/configmaps/fluent-plugin
 ```
 
-5) Edit the daemonset configuration for fluentd to include the fluent-plugin configmap
+You can get the latest fluentd plugin for log insight from https://github.com/vmware/fluent-plugin-vmware-loginsight
+
+4) Edit the daemonset configuration for fluentd to include the fluent-plugin configmap
 
 ```
 $ oc edit daemonset/fluentd
@@ -57,7 +59,7 @@ spec:
       ...
 ```
 
-4) Edit the fluentd configmap with an updated fluent.conf and secure-forward.conf. Substitute your hostname, port, and agent_id for the defaults below:
+5) Edit the fluentd configmap with an updated fluent.conf and secure-forward.conf. Substitute your hostname, port, and agent_id for the defaults below:
 
 ```
 apiVersion: v1
