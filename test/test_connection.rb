@@ -56,7 +56,7 @@ def send_request(req, uri)
                       end
         # ditto cyclic warning
         print "Failed to #{req.method} #{uri}\n(#{res_summary})\n" \
-          "Request Size: #{req.body.size} Request Body: #{req.body[1..1024]}"
+          "Request Size: #{req.body.size} Request Body: #{req.body}"
      end #end unless
   end # end begin
 end # end send_request
@@ -79,20 +79,8 @@ end
 @username = "username"
 @password = "password"
 
-
 uri = URI.parse("http://localhost/test")
-events = [{
-            "fields"=> [
-                       {"name" => "_stream_id", "content" => "e371e115096943599b9900415950045c"},
-                       {"name" => "_systemd_invocation_id", "content" => "ce6b280f6ab545d99efa975251cac67b"},
-                       {"name" => "systemd_t_boot_id", "content" => "1843a41638924fa89320fae1dcde0acd"},
-                       {"name" => "systemd_t_cap_effective", "content" => "3fffffffff"},
-                       {"name" => "systemd_t_cmdline", "content" => "/usr/bin/hyperkube kubelet --config=/etc/kubernetes/kubelet.conf --bootstrap-kubeconfig=/etc/kubernetes/kubeconfig --rotate-certificates --kubeconfig=/var/lib/kubelet/kubeconfig --container-runtime=remote --container-runtime-endpoint=/var/run/crio/crio.sock --node-labels=node-role.kubernetes.io/master,node.openshift.io/os_id=rhcos --minimum-container-ttl-duration=6m0s --cloud-provider=vsphere --volume-plugin-dir=/etc/kubernetes/kubelet-plugins/volume/exec --register-with-taints=node-role.kubernetes.io/master=:NoSchedule --v=3"},
-                       {"name" => "systemd_t_comm", "content" => "hyperkube"},
-                       {"name" => "systemd_t_exe", "content" => "/usr/bin/hyperkube"},
-                       {"name" => "systemd_t_gid", "content" => "0"}
-                      ]
-}]
+events = JSON.parse(File.read("events.json"))
 
 send_events(uri, events)
 
