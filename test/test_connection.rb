@@ -55,8 +55,8 @@ def send_request(req, uri)
                         "Response = nil"
                       end
         # ditto cyclic warning
-        print "Failed to #{req.method} #{uri}\n(#{res_summary})\n" \
-          "Request Size: #{req.body.size} Request Body: #{req.body}"
+        #print "Failed to #{req.method} #{uri}\n(#{res_summary})\n" \
+        #  "Request Size: #{req.body.size} Request Body: #{req.body}"
      end #end unless
   end # end begin
 end # end send_request
@@ -78,8 +78,10 @@ end
 @auth = "basic"
 @username = "username"
 @password = "password"
+@http_conn_debug = true
+@ssl_verify_mode = OpenSSL::SSL::VERIFY_NONE
 
-uri = URI.parse("http://localhost/test")
+uri = URI.parse("https://192.168.1.30:9543/api/v1/events/ingest/aexample-uuid-4b7a-8b09-fbfac4b46fd9")
 events = JSON.parse(File.read("events.json"))
 
 send_events(uri, events)
