@@ -115,9 +115,6 @@ spec:
         - mountPath: /etc/fluent/configs.d/user
           name: config
           readOnly: true
-        - mountPath: /etc/fluent/keys
-          name: certs
-          readOnly: true
         - mountPath: /etc/fluent/plugin
           name: fluent-plugin
           readOnly: true
@@ -172,10 +169,6 @@ spec:
           defaultMode: 420
           name: fluent-plugin
         name: fluent-plugin
-      - name: certs
-        secret:
-          defaultMode: 420
-          secretName: fluentd
       - hostPath:
           path: /etc/localtime
           type: ""
