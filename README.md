@@ -11,23 +11,23 @@ oc create sa logcollector
 ```
 Allow the service account to use the privileged SCC so that fluentd can mount the log directory from the host.
 ```
-oc create role log-collector-privileged \
-  --verb use \
-  --resource securitycontextconstraints \
-  --resource-name privileged \
-  -n openshift-logging                
-oc create rolebinding log-collector-privileged-binding \
-  --role=log-collector-privileged \
-  --serviceaccount=openshift-logging:logcollector
+$ oc create role log-collector-privileged \
+    --verb use \
+    --resource securitycontextconstraints \
+    --resource-name privileged \
+    -n openshift-logging                
+$ oc create rolebinding log-collector-privileged-binding \
+    --role=log-collector-privileged \
+    --serviceaccount=openshift-logging:logcollector
 ```
 Allow the service account to query metadata from kubernetes. This is used to tag the log entries with pod and namespace information.
 ```
-oc create clusterrole metadata-reader \
-  --verb=get,list,watch \
-  --resource=pods,namespaces
-oc create clusterrolebinding cluster-logging-metadata-reader \
-  --clusterrole=metadata-reader \
-  --serviceaccount=openshift-logging:logcollector
+$ oc create clusterrole metadata-reader \
+    --verb=get,list,watch \
+    --resource=pods,namespaces
+$ oc create clusterrolebinding cluster-logging-metadata-reader \
+    --clusterrole=metadata-reader \
+    --serviceaccount=openshift-logging:logcollector
 ```
 
 2) Create the fluent-plugin configmap from the example directory [here](openshift/configmaps/fluent-plugin):
