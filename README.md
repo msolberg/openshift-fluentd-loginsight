@@ -1,65 +1,44 @@
 # openshift-fluentd-loginsight
 Example configuration for log forwarding to log insight for OpenShift 4.x
 
-
 ## Usage
 
-1) First, install the ClusterLogging operator as per instructions at:
-https://access.redhat.com/documentation/en-us/openshift_container_platform/4.2/html/logging/cluster-logging-deploying#cluster-logging-deploy-eo-cli_cluster-logging-deploying
-
-2) Set the ClusterLogging instance to "Unmanaged"
+1) First, create a namespace and a service account for fluentd.
 
 ```
-$ oc edit ClusterLogging/instance
+oc create namespace openshift-logging
+oc create sa logcollector
+```
+Allow the service account to use the privileged SCC so that fluentd can mount the log directory from the host.
+```
+oc create role log-collector-privileged \
+  --verb use \
+  --resource securitycontextconstraints \
+  --resource-name privileged \
+  -n openshift-logging                
+oc create rolebinding log-collector-privileged-binding \
+  --role=log-collector-privileged \
+  --serviceaccount=openshift-logging:logcollector
+```
+Allow the service account to query metadata from kubernetes. This is used to tag the log entries with pod and namespace information.
+```
+oc create clusterrole metadata-reader \
+  --verb=get,list,watch \
+  --resource=pods,namespaces
+oc create clusterrolebinding cluster-logging-metadata-reader \
+  --clusterrole=metadata-reader \
+  --serviceaccount=openshift-logging:logcollector
 ```
 
-3) Create the fluent-plugin configmap from the example directory [here](openshift/configmaps/fluent-plugin):
+2) Create the fluent-plugin configmap from the example directory [here](openshift/configmaps/fluent-plugin):
 
 ```
-$ oc create configmap fluent-plugin --from-file=openshift/configmaps/fluent-plugin
+$ oc create configmap fluent-plugin --from-file=openshift/configmaps/fluent-plugin -n openshift-logging
 ```
 
 You can get the latest fluentd plugin for log insight from https://github.com/vmware/fluent-plugin-vmware-loginsight
 
-4) Edit the daemonset configuration for fluentd to include the fluent-plugin configmap
-
-```
-$ oc edit daemonset/fluentd
-```
-
-Relevant sections are highlighted below:
-
-```
-apiVersion: extensions/v1beta1
-kind: DaemonSet
-metadata:
-  labels:
-    component: fluentd
-    logging-infra: fluentd
-    provider: openshift
-  name: fluentd
-  namespace: openshift-logging
-spec:
-  ...
-    spec:
-      containers:
-      ...
-      volumeMounts:
-      ...
-        - mountPath: /etc/fluent/plugin
-          name: fluent-plugin
-          readOnly: true
-      ...
-      volumes:
-      ...
-      - configMap:
-          defaultMode: 420
-          name: fluent-plugin
-        name: fluent-plugin
-      ...
-```
-
-5) Edit the fluentd configmap with an updated fluent.conf and secure-forward.conf. Substitute your hostname, port, and agent_id for the defaults below:
+3) Create a fluentd configmap with an updated fluent.conf and secure-forward.conf. Substitute your hostname, port, and agent_id for the defaults below:
 
 ```
 apiVersion: v1
@@ -114,4 +93,11 @@ data:
   throttle-config.yaml: ""
 ```
 
-6) Restart pods and check /var/log/fluentd/fluentd.log to make sure that the fluentd daemon isn't erroring out.
+
+4) Create a daemonset for fluentd based on the one provided at [openshift/daemonset-fluentd.yaml](openshift/daemonset-fluentd.yaml)
+
+```
+$ oc create -f openshfit/daemonset-fluentd.yaml
+```
+
+5) Restart pods and check /var/log/fluentd/fluentd.log to make sure that the fluentd daemon isn't erroring out.
