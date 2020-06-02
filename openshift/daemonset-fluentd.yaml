@@ -27,6 +27,12 @@ spec:
     spec:
       containers:
       - env:
+        - name: ENABLE_PROMETHEUS_ENDPOINT
+          value: "false"
+        - name: DEBUG
+          value: "false"
+        - name: VERBOSE
+          value: "false"
         - name: NODE_NAME
           valueFrom:
             fieldRef:
@@ -129,12 +135,9 @@ spec:
           readOnly: true
         - mountPath: /var/lib/fluentd
           name: filebufferstorage
-        - mountPath: /etc/fluent/metrics
-          name: collector-metrics
       dnsPolicy: ClusterFirst
       nodeSelector:
         kubernetes.io/os: linux
-      priorityClassName: cluster-logging
       restartPolicy: Always
       schedulerName: default-scheduler
       securityContext: {}
@@ -185,11 +188,8 @@ spec:
           path: /var/lib/fluentd
           type: ""
         name: filebufferstorage
-      - name: collector-metrics
-        secret:
-          defaultMode: 420
-          secretName: fluentd-metrics
   updateStrategy:
     rollingUpdate:
       maxUnavailable: 1
     type: RollingUpdate
+ 
