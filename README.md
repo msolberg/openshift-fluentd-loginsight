@@ -6,8 +6,8 @@ Example configuration for log forwarding to log insight for OpenShift 4.x
 1) First, create a namespace and a service account for fluentd.
 
 ```
-oc create namespace openshift-logging
-oc create sa logcollector
+$ oc create namespace openshift-logging
+$ oc create sa logcollector
 ```
 Allow the service account to use the privileged SCC so that fluentd can mount the log directory from the host.
 ```
